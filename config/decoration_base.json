@@ -1,0 +1,172 @@
+{
+  "title_box": [
+    {
+      "id": "title_box_001",
+      "name": "左侧细条装饰",
+      "description": "左侧细条+浅色背景，标题精致",
+      "style": "border-left: 4px solid {primary}; background: {primary}06; padding: 6px 16px; border-radius: 0 8px 8px 0;",
+      "title_style": "margin: 0; color: {title_color}; font-size: inherit; font-weight: 600;"
+    },
+    {
+      "id": "title_box_002",
+      "name": "底部细线",
+      "description": "底部细线装饰，简洁大方",
+      "style": "border-bottom: 2px solid {primary}; padding-bottom: 6px; margin-bottom: 12px;",
+      "title_style": "margin: 0; color: {title_color}; font-size: inherit; font-weight: 600;"
+    },
+    {
+      "id": "title_box_003",
+      "name": "圆角浅色底",
+      "description": "圆角浅色背景，标题柔和",
+      "style": "display: inline-block; background: {primary}08; padding: 4px 20px; border-radius: 20px;",
+      "title_style": "margin: 0; color: {primary}; font-size: inherit; font-weight: 600;"
+    },
+    {
+      "id": "title_box_004",
+      "name": "上下细线",
+      "description": "上下细线装饰，标题优雅",
+      "style": "border-top: 1px solid {primary}30; border-bottom: 1px solid {primary}30; padding: 8px 0;",
+      "title_style": "margin: 0; color: {title_color}; font-size: inherit; font-weight: 600; text-align: center;"
+    },
+    {
+      "id": "title_box_005",
+      "name": "渐变底纹",
+      "description": "斜向渐变背景，层次丰富",
+      "style": "background: linear-gradient(135deg, {primary}12, {primary}03); padding: 10px 16px; border-radius: 8px;",
+      "title_style": "margin: 0; color: {primary}; font-size: inherit; font-weight: 600;"
+    },
+    {
+      "id": "title_box_006",
+      "name": "荧光标记",
+      "description": "下划线式高亮标记，像荧光笔划过",
+      "style": "display: inline-block; background: linear-gradient(180deg, transparent 55%, {primary}20 55%); padding: 2px 12px;",
+      "title_style": "margin: 0; color: {title_color}; font-size: inherit; font-weight: 700;"
+    }
+  ],
+  "text_box": [
+    {
+      "id": "text_box_001",
+      "name": "极浅灰底",
+      "description": "极浅灰色背景，温和不抢眼",
+      "style": "background: #f8f8f8; padding: 16px 20px; border-radius: 10px; margin: 20px 0;",
+      "inner_style": "margin: 0; line-height: 1.8; text-indent: 2em; color: #4a4a4a;"
+    },
+    {
+      "id": "text_box_002",
+      "name": "透明边框",
+      "description": "无背景，仅主题色细边框",
+      "style": "border: 1px solid {primary}20; padding: 16px 20px; border-radius: 10px; margin: 20px 0; background: transparent;",
+      "inner_style": "margin: 0; line-height: 1.8; text-indent: 2em;"
+    },
+    {
+      "id": "text_box_003",
+      "name": "极淡主题色底",
+      "description": "透明度极高的主题色背景",
+      "style": "background: {primary}04; padding: 16px 20px; border-radius: 10px; margin: 20px 0;",
+      "inner_style": "margin: 0; line-height: 1.8; text-indent: 2em;"
+    },
+    {
+      "id": "text_box_004",
+      "name": "左侧细线",
+      "description": "左侧细线+透明背景",
+      "style": "border-left: 3px solid {primary}30; padding: 6px 0 6px 16px; margin: 20px 0; background: transparent;",
+      "inner_style": "margin: 0; line-height: 1.8; text-indent: 2em;"
+    },
+    {
+      "id": "text_box_005",
+      "name": "双线边框",
+      "description": "双层线框，内细外粗有层次",
+      "style": "border: 2px solid {primary}30; outline: 1px solid {primary}15; outline-offset: -4px; padding: 20px 24px; border-radius: 8px; margin: 20px 0;",
+      "inner_style": "margin: 0; line-height: 1.8; text-indent: 2em;"
+    },
+    {
+      "id": "text_box_006",
+      "name": "顶部色条",
+      "description": "顶部粗色条+浅灰背景",
+      "style": "border-top: 4px solid {primary}; background: #fafafa; padding: 16px 20px; border-radius: 0 0 8px 8px; margin: 20px 0;",
+      "inner_style": "margin: 0; line-height: 1.8; text-indent: 2em;"
+    }
+  ],
+  "divider": [
+    {
+      "id": "divider_001",
+      "name": "细线",
+      "description": "主题色细线",
+      "html": "<div style='height: 1px; background: {primary}25; margin: 30px 0;'></div>"
+    },
+    {
+      "id": "divider_002",
+      "name": "点线组合",
+      "description": "点+线装饰",
+      "html": "<div style='text-align: center; margin: 30px 0;'><span style='display: inline-block; width: 5px; height: 5px; background: {primary}; border-radius: 50%; margin: 0 8px;'></span><span style='display: inline-block; width: 40px; height: 1px; background: {primary}30; vertical-align: middle;'></span><span style='display: inline-block; width: 5px; height: 5px; background: {primary}; border-radius: 50%; margin: 0 8px;'></span></div>"
+    },
+    {
+      "id": "divider_003",
+      "name": "星号装饰",
+      "description": "三个星号",
+      "html": "<div style='text-align: center; margin: 30px 0; color: {primary}40; font-size: 12px; letter-spacing: 6px;'>✦ ✦ ✦</div>"
+    },
+    {
+      "id": "divider_004",
+      "name": "渐变线",
+      "description": "渐变细线",
+      "html": "<div style='height: 1px; background: linear-gradient(90deg, transparent, {primary}, transparent); margin: 30px 0;'></div>"
+    },
+    {
+      "id": "divider_005",
+      "name": "斜纹",
+      "description": "斜线字符装饰分隔",
+      "html": "<div style='text-align: center; margin: 30px 0; color: {primary}25; font-size: 14px; letter-spacing: 4px;'>/ / / / /</div>"
+    },
+    {
+      "id": "divider_006",
+      "name": "菱形标记",
+      "description": "旋转方块几何分隔",
+      "html": "<div style='text-align: center; margin: 30px 0;'><span style='display: inline-block; width: 5px; height: 5px; background: {primary}40; transform: rotate(45deg); margin: 0 5px;'></span><span style='display: inline-block; width: 30px; height: 1px; background: {primary}20; vertical-align: middle;'></span><span style='display: inline-block; width: 5px; height: 5px; background: {primary}40; transform: rotate(45deg); margin: 0 5px;'></span></div>"
+    }
+  ],
+  "image_separator": [
+    {
+      "id": "image_separator_001",
+      "name": "细线",
+      "description": "图片上下细线分隔",
+      "html_top": "<div style='height: 1px; background: {primary}20; margin: 15px 0 10px 0;'></div>",
+      "html_bottom": "<div style='height: 1px; background: {primary}20; margin: 10px 0 15px 0;'></div>"
+    },
+    {
+      "id": "image_separator_002",
+      "name": "点装饰",
+      "description": "图片上下点装饰",
+      "html_top": "<div style='text-align: center; margin: 12px 0 8px 0;'><span style='display: inline-block; width: 4px; height: 4px; background: {primary}40; border-radius: 50%; margin: 0 5px;'></span><span style='display: inline-block; width: 4px; height: 4px; background: {primary}40; border-radius: 50%; margin: 0 5px;'></span><span style='display: inline-block; width: 4px; height: 4px; background: {primary}40; border-radius: 50%; margin: 0 5px;'></span></div>",
+      "html_bottom": "<div style='text-align: center; margin: 8px 0 12px 0;'><span style='display: inline-block; width: 4px; height: 4px; background: {primary}40; border-radius: 50%; margin: 0 5px;'></span><span style='display: inline-block; width: 4px; height: 4px; background: {primary}40; border-radius: 50%; margin: 0 5px;'></span><span style='display: inline-block; width: 4px; height: 4px; background: {primary}40; border-radius: 50%; margin: 0 5px;'></span></div>"
+    },
+    {
+      "id": "image_separator_003",
+      "name": "极细线",
+      "description": "图片上下极细线",
+      "html_top": "<div style='height: 0.5px; background: {primary}15; margin: 12px 0 8px 0;'></div>",
+      "html_bottom": "<div style='height: 0.5px; background: {primary}15; margin: 8px 0 12px 0;'></div>"
+    },
+    {
+      "id": "image_separator_004",
+      "name": "无分隔",
+      "description": "不加分隔符",
+      "html_top": "",
+      "html_bottom": ""
+    },
+    {
+      "id": "image_separator_005",
+      "name": "虚线",
+      "description": "图片上下虚线分隔",
+      "html_top": "<div style='border-top: 1px dashed {primary}20; margin: 15px 0 10px 0;'></div>",
+      "html_bottom": "<div style='border-top: 1px dashed {primary}20; margin: 10px 0 15px 0;'></div>"
+    },
+    {
+      "id": "image_separator_006",
+      "name": "渐变线",
+      "description": "两端渐隐分隔线",
+      "html_top": "<div style='height: 1px; background: linear-gradient(90deg, transparent, {primary}25, transparent); margin: 15px 0 10px 0;'></div>",
+      "html_bottom": "<div style='height: 1px; background: linear-gradient(90deg, transparent, {primary}25, transparent); margin: 10px 0 15px 0;'></div>"
+    }
+  ]
+}

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>微信公众号自动排版</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <h1>微信公众号自动排版工具</h1>
+    <div id="elUserMenu" class="el-user-menu"></div>
+  </div>
+</header>
+
+<main id="mainContainer" class="main-container">
+  <!-- 左侧输入区 -->
+  <section class="panel panel-input">
+    <h2>内容输入</h2>
+
+    <div class="form-group">
+      <label for="newsText">新闻稿文本 <span class="required">*</span></label>
+      <textarea id="newsText" rows="12" placeholder="请粘贴新闻稿内容..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="imageUpload">上传图片（可多选）</label>
+      <input type="file" id="imageUpload" accept=".jpg,.jpeg" multiple>
+      <ul id="imageList" class="image-list"></ul>
+    </div>
+
+    <h3 class="config-toggle" data-target="configTemplates">模板 ▾</h3>
+    <div id="configTemplates" class="config-body">
+      <div class="form-group" style="margin-bottom:0">
+        <div style="display:flex;gap:6px;align-items:center">
+          <select id="elTemplateSelect" style="flex:1">
+            <option value="">-- 选择模板 --</option>
+          </select>
+          <button id="elTemplateLoad" class="btn-small">加载</button>
+          <button id="elTemplateClear" class="btn-small">清除</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 配置面板 -->
+    <div class="config-panel">
+      <h3 class="config-toggle" data-target="configWen">文编配置 ▾</h3>
+      <div id="configWen" class="config-body">
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="hasLinks"> 添加超链接
+          </label>
+        </div>
+        <div id="linksOptions" style="display:none">
+          <div class="form-group">
+            <label for="linksTitle">链接区域标题</label>
+            <input type="text" id="linksTitle">
+          </div>
+          <div class="form-group">
+            <label>链接列表</label>
+            <div id="linksList">
+              <div class="link-row">
+                <input type="text" class="link-title" placeholder="标题">
+                <input type="url" class="link-url" placeholder="URL">
+                <button type="button" class="btn-remove-link" title="删除">×</button>
+              </div>
+            </div>
+            <button type="button" id="addLink" class="btn-small">+ 添加链接</button>
+          </div>
+        </div>
+        <fieldset>
+          <legend>作者信息</legend>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="author">作者</label>
+              <input type="text" id="author">
+            </div>
+            <div class="form-group">
+              <label for="photographer">摄影</label>
+              <input type="text" id="photographer">
+            </div>
+            <div class="form-group">
+              <label for="editor">责编</label>
+              <input type="text" id="editor">
+            </div>
+          </div>
+        </fieldset>
+
+        <div id="elPromptSection" class="el-prompt-section">
+          <span class="el-prompt-label">AI写手提示词</span>
+          <button id="elPromptEditBtn" class="btn-small">修改</button>
+          <div id="elPromptBody" class="el-prompt-body" style="display:none">
+            <textarea id="elPromptTextarea" class="el-prompt-textarea" rows="8" placeholder="加载中..."></textarea>
+            <div class="el-prompt-select-row">
+              <select id="elPromptSelect" class="el-prompt-select">
+                <option value="">-- 选择已保存的提示词 --</option>
+              </select>
+              <button id="elPromptSave" class="btn-small">保存</button>
+              <button id="elPromptReset" class="btn-small">恢复默认</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="config-toggle" data-target="configMei">美编配置 ▾</h3>
+      <div id="configMei" class="config-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="themeColor">主题色</label>
+            <input type="color" id="themeColor">
+          </div>
+          <div class="form-group">
+            <label for="textColor">正文颜色</label>
+            <input type="color" id="textColor">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="fontFamily">字体</label>
+            <input type="text" id="fontFamily">
+          </div>
+          <div class="form-group">
+            <label for="fontSize">正文字号</label>
+            <input type="text" id="fontSize">
+          </div>
+          <div class="form-group">
+            <label for="lineHeight">行距</label>
+            <input type="text" id="lineHeight">
+          </div>
+        </div>
+        <fieldset>
+          <legend>标题字号</legend>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="h1Size">H1</label>
+              <input type="text" id="h1Size">
+            </div>
+            <div class="form-group">
+              <label for="h2Size">H2</label>
+              <input type="text" id="h2Size">
+            </div>
+            <div class="form-group">
+              <label for="h3Size">H3</label>
+              <input type="text" id="h3Size">
+            </div>
+          </div>
+        </fieldset>
+        <div class="form-group">
+          <label>装饰套组</label>
+        </div>
+        <div id="decorationSet">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="titleBox">标题框</label>
+              <select id="titleBox"></select>
+            </div>
+            <div class="form-group">
+              <label for="textBox">文本框</label>
+              <select id="textBox"></select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="divider">分隔线</label>
+              <select id="divider"></select>
+            </div>
+            <div class="form-group">
+              <label for="imageSep">图片分隔</label>
+              <select id="imageSep"></select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="elKBSection" class="el-kb-section" style="margin-top:12px;padding-top:12px;border-top:1px solid #e8e8e8">
+      <span class="el-kb-label">参考知识库</span>
+      <span class="el-kb-hint" style="color:#999;font-size:12px">（最多选5个）</span>
+      <div id="elKBList" class="el-kb-list" style="margin-top:8px"></div>
+    </div>
+
+    <button id="generateBtn" class="btn-primary">生成推文</button>
+    <button id="elSaveTemplateBtn" class="btn-secondary" style="width:100%;margin-top:8px;display:none">保存为模板</button>
+  </section>
+
+  <!-- 右侧预览区 -->
+  <section class="panel panel-preview">
+    <div class="preview-header">
+      <h2>预览</h2>
+      <label class="edit-toggle-label">
+        <span class="edit-toggle-text">编辑模式</span>
+        <input type="checkbox" id="editToggle" class="edit-toggle-switch" autocomplete="off">
+      </label>
+    </div>
+    <div id="styleControls" class="style-controls" style="display:none">
+      <div class="style-control-item">
+        <label for="editThemeColor">主题色</label>
+        <input type="color" id="editThemeColor" value="#003366">
+      </div>
+      <div class="style-control-item">
+        <label for="editFontSize">字号</label>
+        <input type="range" id="editFontSize" min="14" max="18" value="15" step="1">
+        <span id="fontSizeVal">15px</span>
+      </div>
+      <div class="style-control-item">
+        <label for="editLineHeight">行距</label>
+        <input type="range" id="editLineHeight" min="1.5" max="2.0" value="1.8" step="0.1">
+        <span id="lineHeightVal">1.8</span>
+      </div>
+    </div>
+    <div id="statusBar" class="status-bar" style="display:none"></div>
+    <div class="preview-wrapper">
+      <iframe id="preview" class="preview-frame"></iframe>
+    </div>
+    <div id="timestamp" class="timestamp"></div>
+    <input type="file" id="editorImageInput" accept=".jpg,.jpeg,.png" multiple style="display:none">
+  </section>
+</main>
+
+<!-- 底部操作栏 -->
+<footer class="action-bar">
+  <button id="copyBtn" class="btn-secondary" disabled>复制 HTML</button>
+  <button id="downloadBtn" class="btn-secondary" disabled>下载文件</button>
+  <button id="resetBtn" class="btn-secondary" disabled>重新生成</button>
+  <button id="clearBtn" class="btn-secondary">清空</button>
+  <button id="publishBtn" class="btn-publish" disabled>发布到公众号</button>
+</footer>
+
+<!-- 发布弹窗 -->
+<div id="publishOverlay" class="modal-overlay" style="display:none">
+  <div class="modal-dialog publish-dialog">
+    <div class="modal-header">发布到公众号</div>
+
+    <div class="publish-tabs">
+      <button class="publish-tab active" data-tab="tabInfo">文章信息</button>
+      <button class="publish-tab" data-tab="tabCover">封面图</button>
+      <button class="publish-tab" data-tab="tabWx">微信配置</button>
+      <button class="publish-tab" data-tab="tabAction">发布选项</button>
+    </div>
+
+    <div class="publish-body">
+      <div id="tabInfo" class="publish-tab-content active">
+        <label>标题 <input type="text" id="pubTitle" placeholder="自动提取自 &lt;h1&gt;" /></label>
+        <label>作者 <input type="text" id="pubAuthor" placeholder="公众号名称" /></label>
+      </div>
+
+      <div id="tabCover" class="publish-tab-content">
+        <div id="coverDropZone">
+          <input type="file" id="coverInput" accept="image/*" hidden />
+          <div id="coverPlaceholder">点击或拖拽上传封面图</div>
+          <canvas id="coverCanvas" width="900" height="500" style="display:none"></canvas>
+          <img id="coverPreview" style="display:none" />
+        </div>
+        <div id="coverInfo" style="display:none">
+          <span id="coverSize"></span>
+          <button id="coverRecrop" class="btn-sm">重新裁剪</button>
+        </div>
+      </div>
+
+      <div id="tabWx" class="publish-tab-content">
+        <label>APPID <input type="text" id="pubAppid" placeholder="wx..." /></label>
+        <label>APPSECRET <input type="password" id="pubSecret" placeholder="公众号密钥" /></label>
+      </div>
+
+      <div id="tabAction" class="publish-tab-content">
+        <label><input type="radio" name="pubAction" value="draft" checked /> 仅存草稿（在公众号后台确认后发布）</label>
+        <label><input type="radio" name="pubAction" value="publish" /> 存草稿并发布</label>
+      </div>
+
+      <div id="pubProgress" class="publish-progress" style="display:none"></div>
+
+      <div id="pubResult" class="publish-result" style="display:none">
+        <div id="pubResultContent"></div>
+        <div class="pub-result-actions">
+          <button id="pubCopyLink" class="btn-secondary">复制预览链接</button>
+          <button id="pubCloseResult" class="btn-publish">关闭</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button id="publishCancel" class="btn-secondary">取消</button>
+      <button id="publishSubmit" class="btn-publish">发布草稿</button>
+    </div>
+  </div>
+</div>
+
+<!-- 封面裁剪弹窗 -->
+<div id="cropOverlay" class="modal-overlay" style="display:none">
+  <div class="modal-dialog crop-dialog">
+    <div class="modal-header">裁剪封面图（可拖拽裁剪框）</div>
+    <div class="crop-body">
+      <div class="crop-container" id="cropContainer">
+        <canvas id="cropCanvas"></canvas>
+        <div id="cropBox" class="crop-box"></div>
+      </div>
+      <div class="crop-hint">拖拽蓝色框选择封面区域，固定比例 900×500</div>
+    </div>
+    <div class="modal-footer">
+      <button id="cropCancel" class="btn-secondary">取消</button>
+      <button id="cropConfirm" class="btn-publish">确认裁剪</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" style="display:none"></div>
+
+<script>
+  // Global app state
+  window.AppState = {
+    user: null,
+    templates: [],
+    currentTemplateId: null,
+    currentPromptId: null,
+    promptContent: null,
+    selectedKBIds: []
+  };
+</script>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/templates.js"></script>
+<script src="js/prompts.js"></script>
+<script src="js/knowledge.js"></script>
+<script src="js/user-ui.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

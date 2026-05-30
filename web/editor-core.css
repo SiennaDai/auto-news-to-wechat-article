@@ -1,0 +1,555 @@
+/* ==================== Edit Mode Base ==================== */
+
+body.el-edit-mode {
+  padding-bottom: 40px;
+}
+
+/* ==================== Element Control Buttons (↑ ↓ + e) ==================== */
+
+.el-controls {
+  position: absolute;
+  right: -90px;
+  top: 4px;
+  display: flex;
+  flex-direction: row;
+  gap: 2px;
+  z-index: 100;
+  opacity: 0.85;
+  transition: opacity 0.15s;
+}
+
+body.el-edit-mode .el-controls:hover {
+  opacity: 1;
+}
+
+.el-ctrl-btn {
+  width: 22px;
+  height: 22px;
+  border: 1px solid #d0d0d0;
+  background: #fff;
+  border-radius: 3px;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #555;
+  transition: all 0.15s;
+  line-height: 1;
+  padding: 0;
+}
+
+.el-ctrl-btn:hover {
+  background: #003366;
+  color: #fff;
+  border-color: #003366;
+}
+
+.el-ctrl-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  background: #f0f0f0;
+  color: #ccc;
+  border-color: #e0e0e0;
+}
+
+.el-ctrl-btn:disabled:hover {
+  background: #f0f0f0;
+  color: #ccc;
+  border-color: #e0e0e0;
+}
+
+.el-ctrl-add {
+  font-size: 14px;
+  font-weight: bold;
+  color: #003366;
+  border-color: #003366;
+  border-style: dashed;
+}
+
+.el-ctrl-style {
+  font-size: 10px;
+  font-weight: bold;
+  color: #e67e22;
+  border-color: #e67e22;
+}
+
+.el-ctrl-style:hover {
+  background: #e67e22;
+  color: #fff;
+  border-color: #e67e22;
+}
+
+.el-ctrl-del {
+  color: #e74c3c;
+  border-color: #e74c3c;
+}
+
+.el-ctrl-del:hover {
+  background: #e74c3c;
+  color: #fff;
+  border-color: #e74c3c;
+}
+
+/* ==================== Hover Highlight ==================== */
+
+body.el-edit-mode section > *,
+body.el-edit-mode div[data-el-type] {
+  transition: background 0.15s;
+  border-radius: 3px;
+}
+
+body.el-edit-mode section > *:hover,
+body.el-edit-mode div[data-el-type]:hover {
+  background: rgba(0, 51, 102, 0.03);
+}
+
+/* ==================== Click-to-Edit ==================== */
+
+.el-editing {
+  outline: 2px dashed #999 !important;
+  outline-offset: 2px;
+  min-height: 1.2em;
+}
+
+.el-editing[contenteditable] {
+  cursor: text;
+}
+
+/* ==================== Move Animation ==================== */
+
+.el-moving-up {
+  animation: elSlideUp 0.3s ease;
+}
+
+.el-moving-down {
+  animation: elSlideDown 0.3s ease;
+}
+
+@keyframes elSlideUp {
+  from { transform: translateY(-20px); opacity: 0.5; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes elSlideDown {
+  from { transform: translateY(20px); opacity: 0.5; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+/* ==================== Selection Toolbar ==================== */
+
+.el-selection-toolbar {
+  position: absolute;
+  z-index: 9999;
+  display: none;
+  gap: 2px;
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  padding: 4px;
+}
+
+.el-selection-toolbar button {
+  padding: 5px 10px;
+  border: none;
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #333;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.el-selection-toolbar button:hover {
+  background: #f0f2f5;
+}
+
+.el-selection-toolbar button[data-action="highlight"] {
+  color: #003366;
+  font-weight: 600;
+}
+
+/* ==================== Image Controls in Overlay ==================== */
+
+.el-img-wrapper {
+  position: relative;
+}
+
+.el-image-overlay {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  display: none;
+  gap: 2px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  z-index: 101;
+}
+
+body.el-edit-mode .el-img-wrapper:hover .el-image-overlay {
+  display: flex;
+}
+
+.el-img-btn {
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 3px;
+  background: rgba(0,0,0,0.5);
+  color: #fff;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: background 0.15s;
+}
+
+.el-img-btn:hover {
+  background: rgba(0,0,0,0.75);
+}
+
+.el-delete-btn:hover {
+  background: rgba(231, 76, 60, 0.85);
+}
+
+.el-replace-btn:hover {
+  background: rgba(0, 51, 102, 0.85);
+}
+
+.el-crop-btn:hover {
+  background: rgba(39, 174, 96, 0.85);
+}
+
+/* Layout buttons on group container - top-left */
+.el-layout-btns {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  z-index: 102;
+  display: flex;
+  gap: 1px;
+}
+
+.el-layout-btns button {
+  padding: 1px 6px;
+  border: none;
+  background: rgba(0,0,0,0.45);
+  color: #fff;
+  font-size: 10px;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: background 0.15s;
+}
+
+.el-layout-btns button:not(:disabled):hover {
+  background: rgba(0,0,0,0.7);
+}
+
+.el-layout-btns button:disabled {
+  opacity: 0.35;
+  cursor: default;
+  pointer-events: none;
+}
+
+.el-layout-btns button.el-layout-active {
+  background: rgba(0, 51, 102, 0.8);
+  font-weight: bold;
+}
+
+/* ==================== Image Layout Modes ==================== */
+
+.el-layout-single .el-img-wrapper {
+  display: block;
+  width: 100%;
+}
+
+.el-layout-single img {
+  width: 100%;
+}
+
+.el-layout-side {
+  display: flex !important;
+  gap: 4px;
+  justify-content: center;
+}
+
+.el-layout-side .el-img-wrapper {
+  flex: 1;
+}
+
+.el-layout-side img {
+  width: 100%;
+}
+
+.el-layout-carousel {
+  display: block !important;
+  white-space: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  font-size: 0;
+}
+
+.el-layout-carousel > * {
+  font-size: initial;
+}
+
+.el-layout-carousel .el-img-wrapper {
+  display: inline-block;
+  margin-right: 8px;
+  white-space: normal;
+  vertical-align: top;
+  font-size: initial;
+}
+
+.el-layout-carousel .el-img-wrapper:last-child {
+  margin-right: 0;
+}
+
+.el-layout-carousel img {
+  width: 100%;
+  display: block;
+}
+
+/* ==================== Image Crop Overlay ==================== */
+
+.el-crop-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 200;
+  cursor: crosshair;
+}
+
+.el-crop-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.3);
+}
+
+.el-crop-box {
+  position: absolute;
+  box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
+  outline: 1px dashed #fff;
+  cursor: move;
+  z-index: 1;
+}
+
+.el-crop-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #fff;
+  border: 1px solid #333;
+  border-radius: 2px;
+}
+
+.el-crop-nw { top: -5px; left: -5px; cursor: nw-resize; }
+.el-crop-ne { top: -5px; right: -5px; cursor: ne-resize; }
+.el-crop-sw { bottom: -5px; left: -5px; cursor: sw-resize; }
+.el-crop-se { bottom: -5px; right: -5px; cursor: se-resize; }
+
+.el-crop-actions {
+  position: absolute;
+  bottom: -36px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  z-index: 201;
+  white-space: nowrap;
+}
+
+.el-crop-actions button {
+  padding: 4px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.el-crop-confirm {
+  background: #27ae60;
+  color: #fff;
+}
+
+.el-crop-cancel {
+  background: #e74c3c;
+  color: #fff;
+}
+
+/* ==================== Multi-Image Crop Dialog ==================== */
+
+.el-crop-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.el-crop-dialog {
+  background: #fff;
+  border-radius: 10px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.el-crop-dialog-header {
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  border-bottom: 1px solid #eee;
+  color: #333;
+}
+
+.el-crop-dialog-body {
+  padding: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  overflow-y: auto;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.el-crop-img-container {
+  position: relative;
+  width: calc(50% - 6px);
+  min-width: 200px;
+}
+
+.el-crop-img-container img {
+  display: block;
+}
+
+.el-crop-dialog-footer {
+  padding: 10px 16px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.el-crop-dialog-footer button {
+  padding: 6px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* ==================== Deco Menu Hover Behavior ==================== */
+
+.el-deco-menu {
+  pointer-events: auto;
+}
+
+/* ==================== Insert & Deco Menus ==================== */
+
+.el-insert-menu,
+.el-deco-menu {
+  position: fixed;
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  z-index: 99999;
+  min-width: 120px;
+}
+
+.el-insert-menu button,
+.el-deco-menu button {
+  padding: 7px 14px;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  color: #333;
+  cursor: pointer;
+  border-radius: 4px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.el-insert-menu button:hover,
+.el-deco-menu button:hover {
+  background: #f0f2f5;
+}
+
+/* ==================== Theme Confirm Dialog ==================== */
+
+.el-theme-confirm {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.el-theme-confirm-inner {
+  background: #fff;
+  border-radius: 10px;
+  padding: 24px 28px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  max-width: 320px;
+}
+
+.el-theme-confirm-inner p {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  color: #333;
+  text-indent: 0;
+}
+
+.el-theme-confirm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.el-theme-confirm-yes {
+  padding: 6px 20px;
+  background: #003366;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.el-theme-confirm-no {
+  padding: 6px 20px;
+  background: #f0f0f0;
+  color: #333;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+}

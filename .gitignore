@@ -1,0 +1,10 @@
+data/output/
+__pycache__/
+*.pyc
+.env
+.claude/
+data/app.db
+data/knowledge/
+CLAUDE.md
+DESIGN.md
+HELP.md

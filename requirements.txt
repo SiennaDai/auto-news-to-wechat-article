@@ -1,0 +1,11 @@
+beautifulsoup4
+Pillow
+langgraph
+langchain-openai
+Flask>=2.0.0
+flask-cors>=4.0.0
+bcrypt>=4.0.0
+python-jose>=3.3.0
+pydantic>=2.0.0
+email-validator>=2.0.0
+requests>=2.28.0
