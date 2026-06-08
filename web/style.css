@@ -33,6 +33,30 @@ body {
   margin: 0;
 }
 
+.el-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.el-help-btn {
+  padding: 6px 14px;
+  border: 1px solid #003366;
+  border-radius: 6px;
+  background: #fff;
+  color: #003366;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+
+.el-help-btn:hover {
+  background: #003366;
+  color: #fff;
+}
+
 .header h1 {
   font-size: 20px;
   color: #003366;

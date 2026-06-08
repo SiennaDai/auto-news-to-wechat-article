@@ -115,6 +115,9 @@ def process_with_input(news_text: str, images_dir: str, config: Optional[dict] =
                             writer_prompt=writer_prompt,
                             knowledge_base=knowledge_base)
 
+    # 安全过滤：移除 AI 输出中可能存在风险的 HTML
+    raw_html = sanitize_html(raw_html)
+
     # 3. 加载并合并配置
     config_path = get_config_path()
     with open(config_path, "r", encoding="utf-8") as f:
@@ -169,11 +172,43 @@ def process_with_input(news_text: str, images_dir: str, config: Optional[dict] =
     final_html = polish_article(middle_html, mei_config)
     emit("排版装饰完成", "done")
 
-    # 5. 图片转 Base64 内嵌（发布流程跳过）
+    # 5. 安全过滤（防御纵深）
+    final_html = sanitize_html(final_html)
+
+    # 6. 图片转 Base64 内嵌（发布流程跳过）
     if embed_base64:
         final_html = _embed_images_as_base64(final_html, images_subdir)
 
     return final_html
+
+
+def sanitize_html(html_content: str) -> str:
+    """移除 AI 输出中可能存在风险的 HTML 标签和属性。"""
+    soup = BeautifulSoup(html_content, 'html.parser')
+
+    # 移除危险标签
+    for tag_name in ('script', 'iframe', 'object', 'embed', 'style', 'link', 'meta', 'form', 'input'):
+        for tag in soup.find_all(tag_name):
+            tag.decompose()
+
+    # 移除所有事件处理器属性和 javascript: 协议
+    event_attrs = [a for a in
+        ('onclick', 'onload', 'onerror', 'onmouseover', 'onmouseout', 'onfocus', 'onblur',
+         'onchange', 'onsubmit', 'onkeydown', 'onkeyup', 'onkeypress', 'ondblclick',
+         'oncontextmenu', 'oncopy', 'oncut', 'onpaste', 'ondrag', 'ondrop', 'onscroll',
+         'onwheel', 'onanimationend', 'ontransitionend', 'onresize', 'ontoggle')]
+
+    for tag in soup.find_all(True):
+        for attr in event_attrs:
+            if attr in tag.attrs:
+                del tag[attr]
+        # 移除 javascript: 协议
+        for attr in ('href', 'src', 'action', 'formaction'):
+            val = tag.get(attr)
+            if val and isinstance(val, str) and val.strip().lower().startswith('javascript:'):
+                del tag[attr]
+
+    return str(soup)
 
 
 def _embed_images_as_base64(html_content: str, images_dir: Path) -> str:

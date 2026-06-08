@@ -11,7 +11,6 @@ from backend.database import get_connection
 
 prompt_bp = Blueprint("prompts", __name__, url_prefix="/api/prompts")
 
-
 class PromptSaveRequest(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
     content: str = Field(..., min_length=1)

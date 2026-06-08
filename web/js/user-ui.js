@@ -23,10 +23,9 @@
         '  <span class="el-user-avatar">' + (user.username || '?').charAt(0).toUpperCase() + '</span>' +
         '  <div class="el-user-dropdown">' +
         '    <div class="el-user-dropdown-inner">' +
-        '      <button id="elManagePrompts" class="el-dropdown-item">提示词管理</button>' +
+        '      <button id="elManagePrompts" class="el-dropdown-item">风格偏好管理</button>' +
         '      <button id="elManageTemplates" class="el-dropdown-item">模板管理</button>' +
         '      <button id="elManageKB" class="el-dropdown-item">知识库管理</button>' +
-        '      <button id="elHelpDoc" class="el-dropdown-item">帮助文档</button>' +
         '      <button id="elLogoutBtn" class="el-dropdown-item">登出</button>' +
         '    </div>' +
         '  </div>' +
@@ -35,7 +34,6 @@
       container.querySelector('#elManagePrompts').addEventListener('click', openPromptManager);
       container.querySelector('#elManageTemplates').addEventListener('click', openTemplateManager);
       container.querySelector('#elManageKB').addEventListener('click', openKBManager);
-      container.querySelector('#elHelpDoc').addEventListener('click', openHelpDoc);
       container.querySelector('#elLogoutBtn').addEventListener('click', handleLogout);
     } else {
       container.innerHTML = '<button id="elLoginBtn" class="btn-secondary">登录</button>';
@@ -87,7 +85,7 @@
         window.AppState.currentPromptId = parseInt(id);
         window.AppState.promptContent = content;
       }).catch(function (err) {
-        showToast('加载提示词失败: ' + err.message, 'error');
+        showToast('加载风格偏好失败: ' + err.message, 'error');
       });
     });
 
@@ -112,7 +110,7 @@
         window.AppState.promptContent = null;
         textarea.value = window._promptDefaultText || '';
         select.value = '';
-        showToast('已恢复默认提示词', 'success');
+        showToast('已恢复默认风格偏好', 'success');
       });
     }
 
@@ -121,7 +119,7 @@
   }
 
   function loadDefaultPromptContent() {
-    fetch('/prompts/writer.txt')
+    fetch('/prompts/user_preferences.txt')
       .then(function (r) { return r.text(); })
       .then(function (text) {
         window._promptDefaultText = text;
@@ -140,12 +138,12 @@
     if (!select) return;
 
     if (!Auth.isLoggedIn()) {
-      select.innerHTML = '<option value="">登录后可选择提示词</option>';
+      select.innerHTML = '<option value="">登录后可选择风格偏好</option>';
       return;
     }
 
     Prompts.list().then(function (prompts) {
-      var html = '<option value="">-- 选择已保存的提示词 --</option>';
+      var html = '<option value="">-- 选择已保存的风格偏好 --</option>';
       prompts.forEach(function (p) {
         var marker = p.is_default ? ' ★' : '';
         html += '<option value="' + p.id + '">' + escapeHtml(p.name) + marker + '</option>';
@@ -165,7 +163,7 @@
     Prompts.list().then(function (prompts) {
       var rows = '';
       if (prompts.length === 0) {
-        rows = '<div class="el-empty-hint">暂无保存的提示词</div>';
+        rows = '<div class="el-empty-hint">暂无保存的风格偏好</div>';
       } else {
         prompts.forEach(function (p) {
           rows +=
@@ -186,7 +184,7 @@
       modal.id = 'elPromptManagerOverlay';
       modal.innerHTML =
         '<div class="modal-dialog el-manage-dialog">' +
-        '  <div class="modal-header">提示词管理</div>' +
+        '  <div class="modal-header">风格偏好管理</div>' +
         '  <div class="publish-body" style="max-height:50vh;overflow-y:auto">' + rows + '</div>' +
         '  <div class="modal-footer">' +
         '    <button id="elPMClose" class="btn-secondary">关闭</button>' +
@@ -216,7 +214,7 @@
               body.style.display = '';
               document.getElementById('elPromptEditBtn').textContent = '收起';
             }
-            showToast('提示词已加载', 'success');
+            showToast('风格偏好已加载', 'success');
           } catch (err) {
             showToast('加载失败: ' + err.message, 'error');
           }
@@ -230,7 +228,7 @@
           try {
             await Prompts.setDefault(id);
             modal.remove();
-            showToast('已设为默认提示词', 'success');
+            showToast('已设为默认风格偏好', 'success');
             refreshPromptSelector();
           } catch (err) {
             showToast('操作失败', 'error');
@@ -242,7 +240,7 @@
       modal.querySelectorAll('.el-prompt-delete').forEach(function (btn) {
         btn.addEventListener('click', async function () {
           var id = parseInt(this.dataset.id);
-          if (!confirm('确定删除此提示词？')) return;
+          if (!confirm('确定删除此风格偏好？')) return;
           try {
             await Prompts.remove(id);
             if (window.AppState.currentPromptId === id) {
@@ -251,7 +249,7 @@
               document.getElementById('elPromptTextarea').value = window._promptDefaultText || '';
             }
             modal.remove();
-            showToast('提示词已删除', 'success');
+            showToast('风格偏好已删除', 'success');
             refreshPromptSelector();
           } catch (err) {
             showToast('删除失败', 'error');
@@ -259,7 +257,7 @@
         });
       });
     }).catch(function (err) {
-      showToast('加载提示词列表失败: ' + err.message, 'error');
+      showToast('加载风格偏好列表失败: ' + err.message, 'error');
     });
   }
 
@@ -358,7 +356,7 @@
   function openSavePromptModal() {
     var content = document.getElementById('elPromptTextarea').value;
     if (!content.trim()) {
-      showToast('提示词内容为空', 'error');
+      showToast('风格偏好内容为空', 'error');
       return;
     }
 
@@ -367,10 +365,10 @@
     modal.id = 'elSavePromptOverlay';
     modal.innerHTML =
       '<div class="modal-dialog el-save-dialog">' +
-      '  <div class="modal-header">保存提示词</div>' +
+      '  <div class="modal-header">保存风格偏好</div>' +
       '  <div class="publish-body">' +
       '    <div class="form-group">' +
-      '      <label for="elPromptName">提示词名称</label>' +
+      '      <label for="elPromptName">风格偏好名称</label>' +
       '      <input type="text" id="elPromptName" placeholder="例如：学术风格" maxlength="100">' +
       '    </div>' +
       '    <div id="elSavePromptError" class="el-auth-error"></div>' +
@@ -388,11 +386,11 @@
     modal.querySelector('#elSavePConfirm').addEventListener('click', async function () {
       var name = modal.querySelector('#elPromptName').value.trim();
       var errEl = modal.querySelector('#elSavePromptError');
-      if (!name) { errEl.textContent = '请输入提示词名称'; return; }
+      if (!name) { errEl.textContent = '请输入风格偏好名称'; return; }
       try {
         await Prompts.save(name, content);
         modal.remove();
-        showToast('提示词已保存', 'success');
+        showToast('风格偏好已保存', 'success');
         refreshPromptSelector();
       } catch (err) {
         errEl.textContent = (err.data && err.data.detail) || '保存失败';
@@ -548,6 +546,51 @@
 
   // ============ Help Document ============
 
+  function buildAuthorTable(data) {
+    var html = '';
+    // 项目作者
+    if (data['项目作者']) {
+      html += '<p><strong>作者：</strong>' + escapeHtml(data['项目作者']) + '</p>';
+    }
+    if (data['版本']) {
+      html += '<p><strong>版本：</strong>' + escapeHtml(data['版本']) + '</p>';
+    }
+    // 联系方式
+    if (data['联系方式']) {
+      var contact = data['联系方式'];
+      var parts = [];
+      if (contact['微信']) parts.push('微信：' + escapeHtml(contact['微信']));
+      if (contact['网站']) parts.push('网站：<a href=\"' + escapeHtml(contact['网站']) + '\" target=\"_blank\">' + escapeHtml(contact['网站']) + '</a>');
+      if (parts.length) html += '<p><strong>联系方式：</strong>' + parts.join(' &nbsp;|&nbsp; ') + '</p>';
+    }
+    // 团队成员
+    if (data['团队成员'] && data['团队成员'].length > 0) {
+      html += '<p><strong>团队成员：</strong></p><ul>';
+      data['团队成员'].forEach(function (m) {
+        html += '<li>' + escapeHtml(m['角色']) + '：' + escapeHtml(m['姓名']);
+        if (m['学号']) html += '（' + escapeHtml(m['学号']) + '）';
+        html += '</li>';
+      });
+      html += '</ul>';
+    }
+    // 致谢
+    if (data['致谢']) {
+      html += '<p><strong>致谢：</strong>' + escapeHtml(data['致谢']) + '</p>';
+    }
+    // 版权声明
+    if (data['版权声明']) {
+      html += '<p style=\"color:#999;font-size:12px\">' + escapeHtml(data['版权声明']) + '</p>';
+    }
+    html += '<p style=\"margin-top:12px;font-size:11px;color:#aaa\">（编辑 config/author.json 修改以上信息）</p>';
+    return html;
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+
   function openHelpDoc() {
     var modal = document.createElement('div');
     modal.className = 'modal-overlay';
@@ -564,7 +607,7 @@
       '      <h3>使用流程</h3>' +
       '      <ol>' +
       '        <li><strong>输入内容</strong>：在左侧面板粘贴新闻稿文本，上传图片（JPG格式，支持多选）</li>' +
-      '        <li><strong>配置文编</strong>：设置是否添加超链接、作者/摄影/责编信息，可自定义AI写手提示词</li>' +
+      '        <li><strong>配置文编</strong>：设置是否添加超链接、作者/摄影/责编信息，可自定义AI写手风格偏好</li>' +
       '        <li><strong>配置美编</strong>：选择主题色、字体、字号、行距，搭配标题框/文本框/分隔线/图片分隔的装饰样式</li>' +
       '        <li><strong>选择知识库</strong>：勾选参考知识库（最多5个），AI生成时会参考其中的内容</li>' +
       '        <li><strong>生成推文</strong>：点击"生成推文"按钮，AI将自动排版并流式输出到右侧预览区</li>' +
@@ -598,14 +641,14 @@
       '      </ul>' +
       '    </div>' +
       '    <div class="el-help-section">' +
-      '      <h3>提示词管理</h3>' +
-      '      <p>登录后可保存自定义AI写手提示词，控制文章生成的风格和格式。</p>' +
+      '      <h3>风格偏好管理</h3>' +
+      '      <p>登录后可保存自定义风格偏好，调整文章行文风格。格式规则由系统统一管理，不可修改。</p>' +
       '      <ul>' +
-      '        <li><strong>修改提示词</strong>：在文编配置→AI写手提示词区域，展开后编辑文本</li>' +
-      '        <li><strong>保存提示词</strong>：点击"保存"，输入名称保存（需登录）</li>' +
-      '        <li><strong>加载提示词</strong>：在下拉框中选择已保存的提示词自动填入</li>' +
-      '        <li><strong>恢复默认</strong>：点击"恢复默认"使用系统自带提示词</li>' +
-      '        <li><strong>管理提示词</strong>：点击头像→提示词管理，可加载/删除/设为默认</li>' +
+      '        <li><strong>修改风格偏好</strong>：在文编配置→AI写手风格偏好区域，展开后编辑文本</li>' +
+      '        <li><strong>保存风格偏好</strong>：点击"保存"，输入名称保存（需登录）</li>' +
+      '        <li><strong>加载风格偏好</strong>：在下拉框中选择已保存的风格偏好自动填入</li>' +
+      '        <li><strong>恢复默认</strong>：点击"恢复默认"使用系统默认风格偏好</li>' +
+      '        <li><strong>管理风格偏好</strong>：点击头像→风格偏好管理，可加载/删除/设为默认</li>' +
       '      </ul>' +
       '    </div>' +
       '    <div class="el-help-section">' +
@@ -641,6 +684,10 @@
       '        <li><strong>清空</strong>：清空预览区和输入区，重新开始</li>' +
       '      </ul>' +
       '    </div>' +
+      '    <div class="el-help-section" id="elAuthorSection">' +
+      '      <h3>作者信息</h3>' +
+      '      <p style="color:#999">加载中...</p>' +
+      '    </div>' +
       '  </div>' +
       '  <div class="modal-footer">' +
       '    <button id="elHelpClose" class="btn-secondary">关闭</button>' +
@@ -651,6 +698,21 @@
 
     modal.addEventListener('click', function (e) { if (e.target === modal) modal.remove(); });
     modal.querySelector('#elHelpClose').addEventListener('click', function () { modal.remove(); });
+
+    // 加载作者信息
+    fetch('/api/author-info')
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        var section = modal.querySelector('#elAuthorSection');
+        if (!section) return;
+        var html = '<h3>作者信息</h3>';
+        html += buildAuthorTable(data);
+        section.innerHTML = html;
+      })
+      .catch(function () {
+        var section = modal.querySelector('#elAuthorSection');
+        if (section) section.innerHTML = '<h3>作者信息</h3><p style="color:#999">暂无作者信息（编辑 config/author.json 添加）</p>';
+      });
   }
 
   // ============ Logout handler ============
@@ -699,7 +761,7 @@
 
     document.getElementById('themeColor').value = config.theme_color || '#003366';
     document.getElementById('textColor').value = config.text_color || '#3e3e3e';
-    document.getElementById('fontFamily').value = config.font_family || "system-ui, -apple-system, 'Segoe UI', Roboto";
+    document.getElementById('fontFamily').value = config.font_family || "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
     document.getElementById('fontSize').value = config.font_size || '15px';
     document.getElementById('lineHeight').value = config.line_height || '1.8';
     var titleSizes = config.title_font_sizes || {};
@@ -885,14 +947,20 @@
   });
 
   // Init on DOM ready
+  function bindHelpBtn() {
+    var btn = document.getElementById('elHelpBtn');
+    if (btn) btn.addEventListener('click', openHelpDoc);
+  }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () {
       renderPromptSection();
       bindSaveTemplateBtn();
+      bindHelpBtn();
     });
   } else {
     renderPromptSection();
     bindSaveTemplateBtn();
+    bindHelpBtn();
   }
 
   window.EL.UserUI = {

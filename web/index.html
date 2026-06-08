@@ -11,7 +11,10 @@
 <header class="header">
   <div class="header-inner">
     <h1>微信公众号自动排版工具</h1>
-    <div id="elUserMenu" class="el-user-menu"></div>
+    <div class="el-header-right">
+      <button id="elHelpBtn" class="el-help-btn">帮助文档</button>
+      <div id="elUserMenu" class="el-user-menu"></div>
+    </div>
   </div>
 </header>
 
@@ -22,12 +25,14 @@
 
     <div class="form-group">
       <label for="newsText">新闻稿文本 <span class="required">*</span></label>
-      <textarea id="newsText" rows="12" placeholder="请粘贴新闻稿内容..."></textarea>
+      <textarea id="newsText" rows="12" placeholder="请粘贴新闻稿内容..." maxlength="50000"></textarea>
+      <span id="charCount" style="color:#999;font-size:12px">0 / 50000</span>
     </div>
 
     <div class="form-group">
       <label for="imageUpload">上传图片（可多选）</label>
       <input type="file" id="imageUpload" accept=".jpg,.jpeg" multiple>
+      <p style="color:#888;font-size:12px;margin-top:4px">请将图片命名为对照片内容的详细描述（如：长津湖战役中志愿军战士在冰雪中行军.jpg）</p>
       <ul id="imageList" class="image-list"></ul>
     </div>
 
@@ -89,13 +94,13 @@
         </fieldset>
 
         <div id="elPromptSection" class="el-prompt-section">
-          <span class="el-prompt-label">AI写手提示词</span>
+          <span class="el-prompt-label">AI写手风格偏好</span>
           <button id="elPromptEditBtn" class="btn-small">修改</button>
           <div id="elPromptBody" class="el-prompt-body" style="display:none">
-            <textarea id="elPromptTextarea" class="el-prompt-textarea" rows="8" placeholder="加载中..."></textarea>
+            <textarea id="elPromptTextarea" class="el-prompt-textarea" rows="8" placeholder="请描述你期望的行文风格，如：庄重专业、轻松活泼..."></textarea>
             <div class="el-prompt-select-row">
               <select id="elPromptSelect" class="el-prompt-select">
-                <option value="">-- 选择已保存的提示词 --</option>
+                <option value="">-- 选择已保存的风格偏好 --</option>
               </select>
               <button id="elPromptSave" class="btn-small">保存</button>
               <button id="elPromptReset" class="btn-small">恢复默认</button>
@@ -119,7 +124,14 @@
         <div class="form-row">
           <div class="form-group">
             <label for="fontFamily">字体</label>
-            <input type="text" id="fontFamily">
+            <select id="fontFamily">
+                <option value="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">系统默认</option>
+                <option value="'宋体', 'SimSun', STSong, serif">宋体</option>
+                <option value="'黑体', 'SimHei', 'Heiti SC', sans-serif">黑体</option>
+                <option value="'微软雅黑', 'Microsoft YaHei', 'PingFang SC', sans-serif">微软雅黑</option>
+                <option value="'楷体', 'KaiTi', 'STKaiti', serif">楷体</option>
+                <option value="'仿宋', 'FangSong', 'STFangsong', serif">仿宋</option>
+              </select>
           </div>
           <div class="form-group">
             <label for="fontSize">正文字号</label>

@@ -153,21 +153,21 @@ class WechatArticleGenerator:
         print("[Writer] 开始生成文编稿...")
         self._emit("正在分析新闻稿，生成文章结构...", "running")
 
+        # 系统格式规则始终从 writer.txt 加载，用户不可修改
+        prompt_template = load_prompt("writer")
+
+        # 用户风格偏好（仅可修改内容/风格部分，不涉及格式规则）
         if self._writer_prompt:
-            prompt_template = self._writer_prompt
+            user_prefs = self._writer_prompt
         else:
-            prompt_template = load_prompt("writer")
+            user_prefs = load_prompt("user_preferences")
 
         kb_content = state.get("knowledge_base", "") or ""
 
-        # Escape curly braces in user-provided text for str.format()
-        safe_news = state["original_news"].replace("{", "{{").replace("}", "}}")
-        safe_kb = kb_content.replace("{", "{{").replace("}", "}}")
-
-        prompt = prompt_template.format(
-            original_news=safe_news,
-            knowledge_base=safe_kb
-        )
+        # 使用 str.replace 逐层注入，避免花括号注入问题
+        prompt = prompt_template.replace("{user_preferences}", user_prefs)
+        prompt = prompt.replace("{original_news}", state["original_news"])
+        prompt = prompt.replace("{knowledge_base}", kb_content)
 
         response = self.llm.invoke(prompt)
         state["draft_html"] = response.content

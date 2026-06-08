@@ -20,7 +20,7 @@
   },
   "美编": {
     "主题色": "#003366",
-    "字体": "system-ui, -apple-system, 'Segoe UI', Roboto",
+    "字体": "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif",
     "正文颜色": "#3e3e3e",
     "正文字号": "15px",
     "行距": "1.8",

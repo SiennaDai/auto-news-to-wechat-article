@@ -66,6 +66,11 @@ def decoration_options():
     return send_from_directory("config", "decoration_base.json")
 
 
+@app.route("/api/author-info", methods=["GET"])
+def author_info():
+    return send_from_directory("config", "author.json")
+
+
 @app.route("/generate", methods=["POST"])
 def generate():
     news_text = request.form.get("news_text")

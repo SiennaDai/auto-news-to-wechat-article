@@ -53,7 +53,7 @@ async function loadDefaultConfig() {
     const mei = config.美编 || {};
     document.getElementById('themeColor').value = mei.主题色 || '#003366';
     document.getElementById('textColor').value = mei.正文颜色 || '#3e3e3e';
-    document.getElementById('fontFamily').value = mei.字体 || "system-ui, -apple-system, 'Segoe UI', Roboto";
+    document.getElementById('fontFamily').value = mei.字体 || "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
     document.getElementById('fontSize').value = mei.正文字号 || '15px';
     document.getElementById('lineHeight').value = mei.行距 || '1.8';
     const titleSizes = mei.标题字号列表 || {};
@@ -84,6 +84,8 @@ function populateSelect(selectId, options, selectedId) {
 
 // ==================== 事件绑定 ====================
 
+const NEWS_MAX_LEN = 50000;
+
 function bindEvents() {
   document.getElementById('generateBtn').addEventListener('click', generateArticle);
   document.getElementById('copyBtn').addEventListener('click', copyHTML);
@@ -93,6 +95,14 @@ function bindEvents() {
   document.getElementById('hasLinks').addEventListener('change', toggleLinksOptions);
   document.getElementById('addLink').addEventListener('click', () => addLinkRow('', ''));
   document.getElementById('imageUpload').addEventListener('change', updateImagePreview);
+
+  const newsText = document.getElementById('newsText');
+  newsText.addEventListener('input', function () {
+    var len = newsText.value.length;
+    var cc = document.getElementById('charCount');
+    cc.textContent = len + ' / ' + NEWS_MAX_LEN;
+    cc.style.color = len > NEWS_MAX_LEN * 0.9 ? '#e74c3c' : '#999';
+  });
 
   document.querySelectorAll('.config-toggle').forEach(toggle => {
     toggle.addEventListener('click', () => {
@@ -301,6 +311,10 @@ async function generateArticle() {
     showToast('请输入新闻稿文本', 'error');
     return;
   }
+  if (newsText.length > NEWS_MAX_LEN) {
+    showToast('新闻稿文本超过字数上限（' + NEWS_MAX_LEN + '字）', 'error');
+    return;
+  }
 
   const formData = new FormData();
   formData.append('news_text', newsText);
@@ -497,6 +511,8 @@ function getCurrentHTML() {
 
 function clearForm() {
   document.getElementById('newsText').value = '';
+  document.getElementById('charCount').textContent = '0 / ' + NEWS_MAX_LEN;
+  document.getElementById('charCount').style.color = '#999';
   document.getElementById('imageUpload').value = '';
   document.getElementById('imageList').innerHTML = '';
   document.getElementById('preview').srcdoc = '';
