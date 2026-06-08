@@ -7,6 +7,7 @@
 
   let editMode = false;
   let themeColor = '#003366';
+  let textColor = '#3e3e3e';
   let decoOptions = null;
   let cropState = null;
 
@@ -24,6 +25,8 @@
       case 'editor:updateStyle':
         if (msg.key === 'themeColor') {
           onThemeColorChange(msg.value);
+        } else if (msg.key === 'textColor') {
+          textColor = msg.value;
         } else {
           applyStyle(msg.key, msg.value);
         }
@@ -375,6 +378,7 @@
   // ==================== Selection Toolbar (重点标注 / 链接) ====================
 
   var selectionToolbar = null;
+  var savedSelectionRange = null;
 
   document.addEventListener('mouseup', function (e) {
     if (!editMode) return;
@@ -391,6 +395,8 @@
     }
     var range = sel.getRangeAt(0);
     if (!range || range.collapsed) { hideSelectionToolbar(); return; }
+
+    savedSelectionRange = range.cloneRange();
 
     var rect = range.getBoundingClientRect();
     if (!rect || rect.width === 0) { hideSelectionToolbar(); return; }
@@ -429,39 +435,46 @@
   }
 
   function handleToolbarAction(action) {
-    var sel = window.getSelection();
-    if (!sel || !sel.rangeCount) return;
+    var range = savedSelectionRange;
+    if (!range || range.collapsed) {
+      var sel = window.getSelection();
+      if (sel && sel.rangeCount && !sel.isCollapsed) {
+        range = sel.getRangeAt(0);
+      }
+    }
+    if (!range || range.collapsed) return;
 
     if (action === 'highlight') {
-      // Wrap selection in <strong> with theme color background + bold
-      var strong = document.createElement('strong');
-      strong.style.cssText = 'color:' + themeColor + '; font-weight:700;';
-      try {
-        var range = sel.getRangeAt(0);
-        range.surroundContents(strong);
-      } catch (ex) {
-        document.execCommand('bold', false, null);
-        // Try to apply style to the new bold element
-        var parent = sel.anchorNode;
-        if (parent && parent.parentElement && parent.parentElement.tagName === 'STRONG') {
-          parent.parentElement.style.cssText = 'color:' + themeColor + '; font-weight:700;';
-        }
+      var prevSpan = findWrapper(range, 'span[data-el-unhighlighted]');
+      if (prevSpan) {
+        var strong = document.createElement('strong');
+        strong.style.cssText = 'color:' + themeColor + '; font-weight:700;';
+        strong.innerHTML = prevSpan.innerHTML;
+        prevSpan.parentNode.replaceChild(strong, prevSpan);
+      } else {
+        var frag = range.extractContents();
+        stripBold(frag);
+        var strong = document.createElement('strong');
+        strong.style.cssText = 'color:' + themeColor + '; font-weight:700;';
+        strong.appendChild(frag);
+        range.insertNode(strong);
       }
     } else if (action === 'unhighlight') {
-      // Unwrap strong and remove formatting
-      var sel2 = window.getSelection();
-      if (sel2.rangeCount) {
-        var rng = sel2.getRangeAt(0);
-        var container = rng.commonAncestorContainer;
-        var strongEl = container.nodeType === 3 ? container.parentElement.closest('strong') : container.closest('strong');
-        if (strongEl) {
-          // Unwrap the strong element
-          var parent2 = strongEl.parentNode;
-          while (strongEl.firstChild) {
-            parent2.insertBefore(strongEl.firstChild, strongEl);
-          }
-          parent2.removeChild(strongEl);
-        }
+      var strongEl = findWrapper(range, 'strong');
+      if (strongEl) {
+        var span = document.createElement('span');
+        span.style.cssText = 'color:' + textColor + '; font-weight:normal;';
+        span.setAttribute('data-el-unhighlighted', 'true');
+        span.innerHTML = strongEl.innerHTML;
+        strongEl.parentNode.replaceChild(span, strongEl);
+      } else {
+        var frag = range.extractContents();
+        stripBold(frag);
+        var span = document.createElement('span');
+        span.style.cssText = 'color:' + textColor + '; font-weight:normal;';
+        span.setAttribute('data-el-unhighlighted', 'true');
+        span.appendChild(frag);
+        range.insertNode(span);
       }
     } else if (action === 'link') {
       var url = prompt('输入链接 URL:');
@@ -470,7 +483,51 @@
         document.execCommand('createLink', false, url);
       }
     }
+    savedSelectionRange = null;
     hideSelectionToolbar();
+  }
+
+  function findWrapper(range, selector) {
+    var startEl = range.startContainer.nodeType === 3
+      ? range.startContainer.parentElement
+      : range.startContainer;
+    var fromStart = startEl ? startEl.closest(selector) : null;
+    if (fromStart) return fromStart;
+
+    var endEl = range.endContainer.nodeType === 3
+      ? range.endContainer.parentElement
+      : range.endContainer;
+    var fromEnd = endEl ? endEl.closest(selector) : null;
+    if (fromEnd) return fromEnd;
+
+    var common = range.commonAncestorContainer;
+    if (common.nodeType === 1) {
+      for (var i = range.startOffset; i < range.endOffset; i++) {
+        var child = common.childNodes[i];
+        if (child.nodeType === 1 && child.matches && child.matches(selector)) {
+          return child;
+        }
+      }
+    }
+    return null;
+  }
+
+  function stripBold(frag) {
+    var walker = document.createTreeWalker(frag, NodeFilter.SHOW_ELEMENT, null, false);
+    var boldEls = [];
+    var el;
+    while ((el = walker.nextNode())) {
+      if (el.tagName === 'STRONG' || el.tagName === 'B') {
+        boldEls.push(el);
+      }
+    }
+    boldEls.forEach(function (el) {
+      var parent = el.parentNode;
+      while (el.firstChild) {
+        parent.insertBefore(el.firstChild, el);
+      }
+      parent.removeChild(el);
+    });
   }
 
   function hexToRgba(hex, alpha) {
@@ -1270,7 +1327,17 @@
         newEl.style.textIndent = '2em';
         break;
       case 'divider':
-        newEl = document.createElement('hr');
+        if (decoOptions && decoOptions.divider && decoOptions.divider.length > 0) {
+          var opt = decoOptions.divider[0];
+          var html = applyTemplateColors(opt.html);
+          var temp = document.createElement('div');
+          temp.innerHTML = html;
+          newEl = temp.firstChild;
+          newEl.setAttribute('data-el-type', 'divider');
+          newEl.setAttribute('data-el-id', opt.id);
+        } else {
+          newEl = document.createElement('hr');
+        }
         break;
       case 'images':
         window._elInsertAfter = afterEl;

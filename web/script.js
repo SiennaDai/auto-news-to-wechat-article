@@ -613,6 +613,7 @@ function injectEditor(iframe) {
     // Resend theme color & deco options
     sendDecoOptionsToIframe(iframe);
     sendThemeColorToIframe(iframe);
+    sendTextColorToIframe(iframe);
     return;
   }
   const script = doc.createElement('script');
@@ -628,6 +629,7 @@ function injectEditor(iframe) {
   script.onload = function () {
     sendDecoOptionsToIframe(iframe);
     sendThemeColorToIframe(iframe);
+    sendTextColorToIframe(iframe);
     win.postMessage({ type: 'editor:setMode', mode: 'edit' }, '*');
   };
 }
@@ -647,6 +649,15 @@ function sendThemeColorToIframe(iframe) {
   iframe.contentWindow.postMessage({
     type: 'editor:setThemeColor',
     color: configColor
+  }, '*');
+}
+
+function sendTextColorToIframe(iframe) {
+  const configTextColor = document.getElementById('textColor').value || '#3e3e3e';
+  iframe.contentWindow.postMessage({
+    type: 'editor:updateStyle',
+    key: 'textColor',
+    value: configTextColor
   }, '*');
 }
 
