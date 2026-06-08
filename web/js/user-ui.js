@@ -720,6 +720,41 @@
   async function handleLogout() {
     await Auth.logout();
     showToast('已登出', 'success');
+
+    // Reset all form settings
+    if (typeof loadDefaultConfig === 'function') {
+      await loadDefaultConfig();
+    }
+
+    // Clear news text
+    var newsText = document.getElementById('newsText');
+    if (newsText) newsText.value = '';
+
+    // Clear file input
+    var fileInput = document.getElementById('newsFile');
+    if (fileInput) fileInput.value = '';
+
+    // Clear knowledge base selections
+    window.AppState.selectedKBIds = [];
+    if (typeof refreshKBSelector === 'function') {
+      refreshKBSelector();
+    }
+
+    // Clear iframe preview
+    var iframe = document.getElementById('preview');
+    if (iframe) iframe.srcdoc = '';
+
+    // Reset template selector
+    var tmplSelect = document.getElementById('elTemplateSelect');
+    if (tmplSelect) tmplSelect.value = '';
+
+    // Exit edit mode if active
+    var editToggle = document.getElementById('editToggle');
+    if (editToggle && editToggle.checked) {
+      editToggle.checked = false;
+      editToggle.dispatchEvent(new Event('change'));
+    }
+
     renderUserMenu();
     refreshSaveTemplateBtn();
     refreshPromptSelector();
