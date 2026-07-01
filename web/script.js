@@ -316,9 +316,17 @@ async function generateArticle() {
     return;
   }
 
+  const result = await _doGenerate(newsText, false);
+  if (result === 'filter_cancelled') return;
+}
+
+async function _doGenerate(newsText, filterConfirmed) {
   const formData = new FormData();
   formData.append('news_text', newsText);
   formData.append('config', JSON.stringify(buildConfig()));
+  if (filterConfirmed) {
+    formData.append('filter_confirmed', 'true');
+  }
 
   // Pass template_id if a template is loaded
   if (window.AppState && window.AppState.currentTemplateId) {
@@ -347,10 +355,12 @@ async function generateArticle() {
 
   document.getElementById('generateBtn').disabled = true;
 
+  var timeoutId;
+
   try {
-    // Use AbortController for timeout (6 minutes covers LLM request_timeout=300 + retries)
+    // AbortController for timeout (6 minutes)
     const controller = new AbortController();
-    const timeoutId = setTimeout(function () { controller.abort(); }, 360000);
+    timeoutId = setTimeout(function () { controller.abort(); }, 360000);
 
     const headers = {};
     if (window.EL && window.EL.api && window.EL.api.getToken) {
@@ -364,6 +374,26 @@ async function generateArticle() {
       signal: controller.signal,
       headers: headers
     });
+
+    // Check if it's a filter result (JSON) or SSE stream
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      const data = await response.json();
+      if (data.filter_result === 'no') {
+        statusBar.style.display = 'none';
+        document.getElementById('generateBtn').disabled = false;
+        showFilterModal('no', data.reason);
+        return 'filter_blocked';
+      }
+      if (data.filter_result === 'warn') {
+        statusBar.style.display = 'none';
+        document.getElementById('generateBtn').disabled = false;
+        var confirmed = await showFilterModal('warn', data.reason);
+        if (!confirmed) return 'filter_cancelled';
+        // Re-send with filter_confirmed
+        return _doGenerate(newsText, true);
+      }
+    }
 
     if (!response.ok) {
       let errMsg = '服务器错误 (' + response.status + ')';
@@ -407,9 +437,9 @@ async function generateArticle() {
     } else {
       statusBar.innerHTML = '<span class="status-icon error"></span> ' + (e.message || '连接错误，请检查网络');
     }
-  } finally {
-    clearTimeout(timeoutId);
     document.getElementById('generateBtn').disabled = false;
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
   }
 }
 
@@ -447,9 +477,17 @@ function handleSSEEvent(event, statusBar) {
       }
       break;
 
+    case 'context_result':
+      statusBar.className = 'status-bar status-error';
+      statusBar.innerHTML = '<span class="status-icon error"></span> 生成已终止';
+      document.getElementById('generateBtn').disabled = false;
+      showContextResultModal(event.reason, event.checker);
+      break;
+
     case 'error':
       statusBar.className = 'status-bar status-error';
       statusBar.innerHTML = '<span class="status-icon error"></span> ' + event.message;
+      document.getElementById('generateBtn').disabled = false;
       break;
   }
 }
@@ -1250,6 +1288,71 @@ document.getElementById('pubCopyLink').addEventListener('click', function () {
 });
 document.getElementById('pubCloseResult').addEventListener('click', closePublishDialog);
 
-function escapeHtml(s) {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+// ==================== Filter & Context Result 弹窗 ====================
+
+function showFilterModal(result, reason) {
+  return new Promise(function (resolve) {
+    var overlay = document.createElement('div');
+    overlay.className = 'el-modal-overlay';
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+
+    var box = document.createElement('div');
+    box.style.cssText = 'background:#fff;border-radius:12px;padding:32px;max-width:440px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.2);';
+
+    var icon = result === 'no'
+      ? '<div style="font-size:40px;text-align:center;margin-bottom:12px;">&#x26D4;</div>'
+      : '<div style="font-size:40px;text-align:center;margin-bottom:12px;">&#x26A0;&#xFE0F;</div>';
+
+    var title = result === 'no'
+      ? '<h3 style="margin:0 0 8px;text-align:center;color:#e74c3c;">内容审核未通过</h3>'
+      : '<h3 style="margin:0 0 8px;text-align:center;color:#e67e22;">检测到潜在风险</h3>';
+
+    var reasonHtml = '<p style="margin:0 0 20px;text-align:center;color:#666;font-size:14px;line-height:1.6;">' + escapeHtml(reason) + '</p>';
+
+    var warnExtra = result === 'warn'
+      ? '<p style="margin:0 0 16px;text-align:center;color:#999;font-size:13px;">继续生成可能被AI拒绝</p>'
+      : '';
+
+    var buttons = result === 'no'
+      ? '<button id="_fmOk" style="width:100%;padding:10px;background:#1aad19;color:#fff;border:none;border-radius:6px;font-size:15px;cursor:pointer;">我知道了</button>'
+      : '<div style="display:flex;gap:12px;"><button id="_fmCancel" style="flex:1;padding:10px;background:#f0f0f0;border:none;border-radius:6px;font-size:15px;cursor:pointer;">取消</button><button id="_fmContinue" style="flex:1;padding:10px;background:#1aad19;color:#fff;border:none;border-radius:6px;font-size:15px;cursor:pointer;">继续生成</button></div>';
+
+    box.innerHTML = icon + title + reasonHtml + warnExtra + buttons;
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+
+    function close(val) { overlay.remove(); resolve(val); }
+
+    if (result === 'no') {
+      box.querySelector('#_fmOk').addEventListener('click', function () { close(false); });
+    } else {
+      box.querySelector('#_fmCancel').addEventListener('click', function () { close(false); });
+      box.querySelector('#_fmContinue').addEventListener('click', function () { close(true); });
+    }
+  });
+}
+
+function showContextResultModal(reason, checker) {
+  var overlay = document.createElement('div');
+  overlay.className = 'el-modal-overlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+
+  var box = document.createElement('div');
+  box.style.cssText = 'background:#fff;border-radius:12px;padding:32px;max-width:520px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.2);max-height:80vh;overflow-y:auto;';
+
+  var checkerLabel = (checker === 'cc1')
+    ? '<span style="background:#f0f0f0;color:#999;font-size:11px;padding:2px 8px;border-radius:4px;">AI 平台审核</span>'
+    : '<span style="background:#f0f0f0;color:#999;font-size:11px;padding:2px 8px;border-radius:4px;">事实校验</span>';
+
+  box.innerHTML =
+    '<div style="font-size:40px;text-align:center;margin-bottom:12px;">&#x26D4;</div>' +
+    '<h3 style="margin:0 0 4px;text-align:center;color:#e74c3c;">内容安全策略已拦截 ' + checkerLabel + '</h3>' +
+    '<p style="margin:0 0 16px;text-align:center;color:#999;font-size:13px;">生成内容被安全策略拦截，以下为具体原因</p>' +
+    '<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:16px;margin-bottom:20px;font-size:14px;color:#991b1b;line-height:1.6;white-space:pre-wrap;word-break:break-all;">' + escapeHtml(reason || '未知原因') + '</div>' +
+    '<button id="_crmOk" style="width:100%;padding:10px;background:#1aad19;color:#fff;border:none;border-radius:6px;font-size:15px;cursor:pointer;">我知道了</button>';
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+
+  box.querySelector('#_crmOk').addEventListener('click', function () { overlay.remove(); });
 }

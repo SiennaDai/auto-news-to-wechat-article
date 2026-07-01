@@ -23,6 +23,8 @@ from src.utils import get_config_path
 from src.wechat_api import (get_access_token, upload_body_image, upload_thumb,
                              create_draft, publish_draft, list_drafts,
                              delete_draft, get_draft_url)
+from src.words_agents import AgentRejected
+from src.agents.filter import run_filter
 
 from backend.database import init_db, get_connection
 from backend.auth import optional_auth
@@ -111,6 +113,7 @@ def generate():
 # ---- Knowledge Base helpers ----
 
 _llm_instance = None
+_checker_llm_instance = None
 
 
 def _get_llm():
@@ -121,6 +124,17 @@ def _get_llm():
         _llm_instance = ChatOpenAI(model="deepseek-v4-flash", api_key=api_key,
                                    base_url=base_url, temperature=0.3)
     return _llm_instance
+
+
+def _get_checker_llm():
+    """Filter Agent 专用 LLM 实例，temperature 0.1"""
+    global _checker_llm_instance
+    if _checker_llm_instance is None:
+        api_key = os.environ.get("DEEPSEEK_API_KEY", "")
+        base_url = os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1")
+        _checker_llm_instance = ChatOpenAI(model="deepseek-v4-flash", api_key=api_key,
+                                           base_url=base_url, temperature=0.1)
+    return _checker_llm_instance
 
 
 def _summarize_text(text: str, kb_name: str) -> str:
@@ -219,6 +233,16 @@ def generate_stream():
             return jsonify({"error": "auth_required", "detail": "使用知识库需要登录"}), 400
         knowledge_base = _build_knowledge_text(kb_ids_str)
 
+    # ===== Filter 预检（同步，SSE 之前） =====
+    filter_confirmed = request.form.get("filter_confirmed", "") == "true"
+    if not filter_confirmed:
+        filter_result = run_filter(news_text, _get_checker_llm())
+        if filter_result["result"] in ("no", "warn"):
+            return jsonify({
+                "filter_result": filter_result["result"],
+                "reason": filter_result.get("reason", "")
+            }), 200
+
     # 在主线程中提取请求数据（线程中无 request 上下文）
     uploaded_files_data = []
     for f in request.files.getlist("images"):
@@ -249,6 +273,14 @@ def generate_stream():
                                           knowledge_base=knowledge_base)
                 q.put(json.dumps({"type": "complete", "html": html}, ensure_ascii=False))
 
+            except AgentRejected as e:
+                q.put(json.dumps({
+                    "type": "context_result",
+                    "result": "no",
+                    "checker": e.source,
+                    "reason": e.reason
+                }, ensure_ascii=False))
+
             except Exception as e:
                 traceback.print_exc()
                 q.put(json.dumps({"type": "error", "message": str(e)}, ensure_ascii=False))
@@ -265,7 +297,7 @@ def generate_stream():
                 data = q.get(timeout=0.3)
                 yield f"data: {data}\n\n"
                 parsed = json.loads(data)
-                if parsed["type"] in ("complete", "error"):
+                if parsed["type"] in ("complete", "error", "context_result"):
                     break
             except queue.Empty:
                 yield ": heartbeat\n\n"
