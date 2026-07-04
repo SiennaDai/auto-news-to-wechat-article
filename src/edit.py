@@ -27,6 +27,10 @@ def process_article(html_content: str, config: dict) -> str:
     html_content = clean_llm_output(html_content)
     soup = BeautifulSoup(html_content, 'html.parser')
 
+    # ========== 0. 清理 Writer 残留的 image-placeholder 空占位符 ==========
+    for placeholder in soup.find_all('div', class_='image-placeholder'):
+        placeholder.decompose()
+
     # ========== 1. 基础容器样式 ==========
     outer_div = soup.find('div')
     if outer_div:
